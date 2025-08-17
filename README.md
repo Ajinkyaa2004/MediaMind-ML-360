@@ -13,16 +13,27 @@ An AI-powered system to monitor, analyze, and report Government of India news st
 
 **🛠️ Tech Stack**
 Web Crawling: Python (Scrapy, BeautifulSoup)
+
 OCR: Tesseract, EasyOCR, PaddleOCR
+
 NLP & Sentiment Analysis: SpaCy, HuggingFace Transformers (mBERT, IndicBERT)
+
 Classification: Scikit-learn, TensorFlow, PyTorch
+
 Notifications: Twilio, Firebase Cloud Messaging
+
 Backend: Django, Flask, Node.js
+
 Database: PostgreSQL, MongoDB, ElasticSearch
+
 Frontend: React, Angular, Vue.js
+
 Cloud & DevOps: AWS, Azure, Docker, Kubernetes
+
 Security: OAuth, JWT, SSL/HTTPS
+
 Visualization: Plotly, Chart.js
+
 Multilingual Support: Pre-trained models, translation APIs, Indic NLP tools
 
 
