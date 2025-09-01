@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 node_modules/
+mediamind-ml-360-firebase-adminsdk-fbsvc-*.json
+mediamind-ml-360-firebase-adminsdk-fbsvc-*.json
