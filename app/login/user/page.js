@@ -7,7 +7,7 @@ import { Mail, Lock } from "lucide-react";
 import { auth } from "@/firebase/client"; 
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast"; // ✅ Import toast
+import toast, { Toaster } from "react-hot-toast"; 
 
 const plusJakartaSans = Plus_Jakarta_Sans({
     subsets: ["latin"],
@@ -53,7 +53,7 @@ export default function UserLoginPage() {
             console.log("User logged in:", user.uid);
 
             toast.success("Login successful!"); // ✅ Toast success
-            router.push("/user/dashboard");
+            router.push("/dashboard");
         } catch (error) {
             console.error("Login error:", error);
             toast.error(error.message); // ✅ Toast error
@@ -116,7 +116,7 @@ export default function UserLoginPage() {
                                     style={{ color: "#000000", caretColor: sunsetOrange }}
                                     placeholder=" "
                                 />
-                                <label htmlFor="email" className="absolute left-14 top-3 text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+                                <label htmlFor="email" className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-xs peer-focus:text-orange-500">
                                     Enter your email
                                 </label>
                             </div>
@@ -138,7 +138,7 @@ export default function UserLoginPage() {
                                     style={{ color: "#000000", caretColor: sunsetOrange }}
                                     placeholder=" "
                                 />
-                                <label htmlFor="password" className="absolute left-14 top-3 text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+                                <label htmlFor="password" className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-xs peer-focus:text-orange-500">
                                     Enter your password
                                 </label>
                             </div>

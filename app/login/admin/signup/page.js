@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // ✅ import router
 import { motion } from "framer-motion";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { User, Hash, Mail, Lock } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 // 🔥 Import Firebase client
-import { auth, db } from "@/firebase/client"; // adjust path if needed
+import { auth, db } from "@/firebase/client"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
@@ -16,6 +18,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export default function AdminSignupPage() {
+  const router = useRouter(); // ✅ init router
+
   const [fullName, setFullName] = useState("");
   const [govtId, setGovtId] = useState("");
   const [govtEmail, setGovtEmail] = useState("");
@@ -62,7 +66,6 @@ export default function AdminSignupPage() {
     }
 
     setErrors(tempErrors);
-
     if (!valid) return;
 
     try {
@@ -81,22 +84,30 @@ export default function AdminSignupPage() {
       });
 
       setLoading(false);
-      alert("Admin account created successfully!");
-      // 🔥 Optional: redirect to admin login
-      // router.push("/login/admin");
+      toast.success("Admin account created successfully! 🎉");
+
+      // ✅ Redirect after small delay (so user sees toast)
+      setTimeout(() => {
+        router.push("/login/admin"); // your login route
+      }, 2000);
+
     } catch (error) {
       console.error("Error creating admin:", error);
       setLoading(false);
       if (error.code === "auth/email-already-in-use") {
         setErrors((prev) => ({ ...prev, govtEmail: "Email is already in use" }));
+        toast.error("This email is already registered ⚠️");
       } else {
-        alert("Failed to create admin: " + error.message);
+        toast.error("Failed to create admin: " + error.message);
       }
     }
   };
 
   return (
     <div className={`${plusJakartaSans.className} relative flex flex-col justify-between h-screen w-full overflow-hidden`}>
+      {/* 🔥 Toaster must be inside the root */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       {/* Background */}
       <div className="absolute inset-0 -z-10 animate-gradient bg-gradient-to-br from-orange-200 via-white to-orange-100" />
 
@@ -121,10 +132,112 @@ export default function AdminSignupPage() {
             <div className="mt-4 w-16 h-1 bg-orange-600 mx-auto rounded-full"></div>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSignUp} className="space-y-6">
-            {/* Full Legal Name */}
-            {/* ... your input fields unchanged ... */}
+              <div className="relative">
+    <div className="relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-inner backdrop-blur-lg focus-within:ring-2 focus-within:ring-orange-400">
+      <div className="flex items-center justify-center w-12 h-12 bg-orange-50/60">
+        <User className="w-5 h-5" style={{ color: sunsetOrange }} />
+      </div>
+      <input
+        type="text"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        className="peer flex-1 px-4 pt-5 pb-2 bg-transparent focus:outline-none text-black"
+        style={{ color: "#000000", caretColor: sunsetOrange }}
+        placeholder=" "
+      />
+      <label className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+        Full Legal Name
+      </label>
+    </div>
+    {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
+  </div>
 
+  {/* Government ID */}
+  <div className="relative">
+    <div className="relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-inner backdrop-blur-lg focus-within:ring-2 focus-within:ring-orange-400">
+      <div className="flex items-center justify-center w-12 h-12 bg-orange-50/60">
+        <Hash className="w-5 h-5" style={{ color: sunsetOrange }} />
+      </div>
+      <input
+        type="text"
+        value={govtId}
+        onChange={(e) => setGovtId(e.target.value)}
+        className="peer flex-1 px-4 pt-5 pb-2 bg-transparent focus:outline-none text-black"
+        style={{ color: "#000000", caretColor: sunsetOrange }}
+        placeholder=" "
+      />
+      <label className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+        Government ID Number
+      </label>
+    </div>
+    {errors.govtId && <p className="text-red-500 text-xs mt-1">{errors.govtId}</p>}
+  </div>
+
+  {/* Government Email */}
+  <div className="relative">
+    <div className="relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-inner backdrop-blur-lg focus-within:ring-2 focus-within:ring-orange-400">
+      <div className="flex items-center justify-center w-12 h-12 bg-orange-50/60">
+        <Mail className="w-5 h-5" style={{ color: sunsetOrange }} />
+      </div>
+      <input
+        type="email"
+        value={govtEmail}
+        onChange={(e) => setGovtEmail(e.target.value)}
+        className="peer flex-1 px-4 pt-5 pb-2 bg-transparent focus:outline-none text-black"
+        style={{ color: "#000000", caretColor: sunsetOrange }}
+        placeholder=" "
+      />
+      <label className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+        Government Email
+      </label>
+    </div>
+    {errors.govtEmail && <p className="text-red-500 text-xs mt-1">{errors.govtEmail}</p>}
+  </div>
+
+  {/* Password */}
+  <div className="relative">
+    <div className="relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-inner backdrop-blur-lg focus-within:ring-2 focus-within:ring-orange-400">
+      <div className="flex items-center justify-center w-12 h-12 bg-orange-50/60">
+        <Lock className="w-5 h-5" style={{ color: sunsetOrange }} />
+      </div>
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="peer flex-1 px-4 pt-5 pb-2 bg-transparent focus:outline-none text-black"
+        style={{ color: "#000000", caretColor: sunsetOrange }}
+        placeholder=" "
+      />
+      <label className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+        Password
+      </label>
+    </div>
+    {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+  </div>
+
+  {/* Confirm Password */}
+  <div className="relative">
+    <div className="relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-inner backdrop-blur-lg focus-within:ring-2 focus-within:ring-orange-400">
+      <div className="flex items-center justify-center w-12 h-12 bg-orange-50/60">
+        <Lock className="w-5 h-5" style={{ color: sunsetOrange }} />
+      </div>
+      <input
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        className="peer flex-1 px-4 pt-5 pb-2 bg-transparent focus:outline-none text-black"
+        style={{ color: "#000000", caretColor: sunsetOrange }}
+        placeholder=" "
+      />
+      <label className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+        Confirm Password
+      </label>
+    </div>
+    {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+  </div>
+            
             {/* Button */}
             <div className="flex justify-center">
               <motion.button

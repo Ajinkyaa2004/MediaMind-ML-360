@@ -139,7 +139,7 @@ export default function UserSignUpPage() {
                                     style={{ color: "#000000", caretColor: sunsetOrange }}
                                     placeholder=" "
                                 />
-                                <label htmlFor="fullName" className="absolute left-14 top-3 text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+                                <label htmlFor="fullName" className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
                                     Enter your full name
                                 </label>
                             </div>
@@ -161,7 +161,7 @@ export default function UserSignUpPage() {
                                     style={{ color: "#000000", caretColor: sunsetOrange }}
                                     placeholder=" "
                                 />
-                                <label htmlFor="email" className="absolute left-14 top-3 text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+                                <label htmlFor="email" className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
                                     Enter your email
                                 </label>
                             </div>
@@ -183,7 +183,7 @@ export default function UserSignUpPage() {
                                     style={{ color: "#000000", caretColor: sunsetOrange }}
                                     placeholder=" "
                                 />
-                                <label htmlFor="password" className="absolute left-14 top-3 text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+                                <label htmlFor="password" className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
                                     Enter your password
                                 </label>
                             </div>
@@ -205,7 +205,7 @@ export default function UserSignUpPage() {
                                     style={{ color: "#000000", caretColor: sunsetOrange }}
                                     placeholder=" "
                                 />
-                                <label htmlFor="confirmPassword" className="absolute left-14 top-3 text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
+                                <label htmlFor="confirmPassword" className="absolute left-14 top-1 text-xs text-gray-500 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-orange-500">
                                     Confirm your password
                                 </label>
                             </div>
