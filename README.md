@@ -1,4 +1,4 @@
-# YourProjectName
+# MediaMind ML-360
 
 An AI-powered media monitoring and feedback platform designed for the Government of India’s Press Information Bureau (PIB). The system uses Artificial Intelligence and Machine Learning to crawl regional media sites and YouTube channels, analyze news content in multiple Indian languages, and categorize stories by department and sentiment (positive, neutral, negative). Real-time alerts notify PIB officers about negative news to enable proactive crisis management and data-driven governance.
 
@@ -39,5 +39,5 @@ An AI-powered media monitoring and feedback platform designed for the Government
 <!-- Add your dashboard or analytics screenshot here -->
 <img src="path/to/your-dashboard-screenshot.png" width="800" />
 
-🔗 Live Demo: [Your Live Demo URL]  
-🔗 Repo: [Your GitHub Repository URL] | 📫 Contact: [Your LinkedIn or Email URL]
+🔗 Live Demo: [[Your Live Demo URL](https://mediamindml-360.vercel.app/)]  
+🔗 Repo: [https://github.com/Ajinkyaa2004/MediaMind-ML-360] | 📫 Contact: [Your LinkedIn or Email URL]
