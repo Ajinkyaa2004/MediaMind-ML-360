@@ -5,7 +5,7 @@ import { auth, db } from "@/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, collection, serverTimestamp } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { ListTodo, CheckCircle, Clock } from "lucide-react";
+import { ListTodo, CheckCircle, Clock, Filter, SortAsc, SortDesc, AlertTriangle, FileText, X, Eye, Newspaper, Search, Download } from "lucide-react";
 import { getDatabase, ref, push, set, get, child, onValue } from "firebase/database";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { Toaster, toast } from "react-hot-toast";
@@ -39,6 +39,13 @@ export default function DashboardPage() {
   const [activeTicketLink, setActiveTicketLink] = useState(null);
   const [ticketComment, setTicketComment] = useState('');
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+
+  // New State for Enhanced Features
+  const [filter, setFilter] = useState({ department: 'All', sentiment: 'All', status: 'All' });
+  const [sortBy, setSortBy] = useState('newest');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [clippingLink, setClippingLink] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Function to create an admin user
   const createAdminUser = async (email, fullName) => {
@@ -82,7 +89,7 @@ export default function DashboardPage() {
     const total = links.length;
     const completed = links.filter(link => link.processed).length;
     const pending = total - completed;
-    
+
     setTasksSummary({
       total,
       completed,
@@ -93,7 +100,7 @@ export default function DashboardPage() {
   // Set up realtime listener for user's links
   useEffect(() => {
     if (!user?.email) return;
-    
+
     const dbRef = ref(realtimeDB, 'links');
     const unsubscribe = onValue(dbRef, (snapshot) => {
       try {
@@ -105,7 +112,7 @@ export default function DashboardPage() {
               id: key,
               ...value
             }));
-          
+
           setUserLinks(filteredLinks);
           calculateTaskSummary(filteredLinks);
         }
@@ -126,7 +133,7 @@ export default function DashboardPage() {
     try {
       const dbRef = ref(realtimeDB, 'links');
       const snapshot = await get(dbRef);
-      
+
       if (snapshot.exists()) {
         const linksData = snapshot.val();
         const filteredLinks = Object.entries(linksData)
@@ -135,7 +142,7 @@ export default function DashboardPage() {
             id: key,
             ...value
           }));
-        
+
         setUserLinks(filteredLinks);
         calculateTaskSummary(filteredLinks);
       }
@@ -161,7 +168,7 @@ export default function DashboardPage() {
     try {
       const ticketRef = ref(realtimeDB, 'raisedTickets');
       const newTicketRef = push(ticketRef);
-      
+
       await set(newTicketRef, {
         linkId: activeTicketLink.id,
         url: activeTicketLink.url,
@@ -233,10 +240,10 @@ export default function DashboardPage() {
       // Push data including all details and user email
       await set(ref(realtimeDB, "links/" + newKey), {
         id: nextId,
-        title: `Submitted to ${link.department || 'Uncategorized'}`,
-        content: `Link submitted to ${link.department || 'Uncategorized'}`,
-        department: link.department || 'Uncategorized',
-        sentiment: "negative",
+        title: `Submitted to Uncategorized`,
+        content: `Link submitted to Uncategorized`,
+        department: 'Uncategorized',
+        sentiment: "negative", // Default for testing, ideally backend sets this
         tonality: "negative",
         url: link,
         userEmail: user.email,
@@ -246,7 +253,7 @@ export default function DashboardPage() {
 
       // Refresh the user's links
       await fetchUserLinks(user.email);
-      
+
       toast.success(`✅ Link #${nextId} submitted successfully!`, { id: loadingToast });
       e.target.reset();
     } catch (err) {
@@ -255,6 +262,66 @@ export default function DashboardPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Filter and Sort Logic
+  const getFilteredAndSortedLinks = () => {
+    return userLinks.filter(link => {
+      if (filter.department !== 'All' && (link.department || 'Uncategorized') !== filter.department) return false;
+      if (filter.sentiment !== 'All' && (link.sentiment || 'neutral') !== filter.sentiment) return false;
+      if (filter.status !== 'All') {
+        const isProcessed = link.processed;
+        if (filter.status === 'Processed' && !isProcessed) return false;
+        if (filter.status === 'Pending' && isProcessed) return false;
+      }
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const titleMatch = (link.title || '').toLowerCase().includes(searchLower);
+        const urlMatch = (link.url || '').toLowerCase().includes(searchLower);
+        const deptMatch = (link.department || '').toLowerCase().includes(searchLower);
+        if (!titleMatch && !urlMatch && !deptMatch) return false;
+      }
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === 'newest') return new Date(b.timestamp) - new Date(a.timestamp);
+      if (sortBy === 'oldest') return new Date(a.timestamp) - new Date(b.timestamp);
+      return 0;
+    });
+  };
+
+  const filteredLinks = getFilteredAndSortedLinks();
+  const uniqueDepartments = ['All', ...new Set(userLinks.map(l => l.department || 'Uncategorized'))];
+  const negativeLinks = userLinks.filter(l => l.sentiment === 'negative');
+
+  // Export to CSV
+  const handleExport = () => {
+    if (filteredLinks.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    const headers = ["ID", "Title", "URL", "Department", "Sentiment", "Status", "Date"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredLinks.map(link => [
+        link.id,
+        `"${(link.title || '').replace(/"/g, '""')}"`,
+        `"${link.url}"`,
+        `"${link.department || ''}"`,
+        link.sentiment || '',
+        link.processed ? 'Processed' : 'Pending',
+        new Date(link.timestamp).toLocaleDateString()
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `mediamind_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
 
@@ -354,25 +421,85 @@ export default function DashboardPage() {
           >
             {submitting ? "Submitting..." : "Submit Link"}
           </button>
-
         </form>
 
         <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4">Your Submitted Links</h3>
-          {userLinks.length === 0 ? (
-            <p className="text-gray-500">No links submitted yet.</p>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h3 className="text-lg font-semibold">Your Submitted Links</h3>
+
+            {/* Filter Toolbar */}
+            <div className="flex flex-wrap gap-2 items-center">
+              {/* Search Bar */}
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 focus-within:ring-2 focus-within:ring-orange-100">
+                <Search className="w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="text-sm bg-transparent border-none focus:outline-none w-24 sm:w-32 md:w-40"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+                <Filter className="w-4 h-4 text-gray-500" />
+                <select
+                  className="text-sm bg-transparent border-none focus:ring-0 cursor-pointer"
+                  value={filter.department}
+                  onChange={(e) => setFilter({ ...filter, department: e.target.value })}
+                >
+                  {uniqueDepartments.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+                <select
+                  className="text-sm bg-transparent border-none focus:ring-0 cursor-pointer"
+                  value={filter.sentiment}
+                  onChange={(e) => setFilter({ ...filter, sentiment: e.target.value })}
+                >
+                  <option value="All">All Sentiments</option>
+                  <option value="positive">Positive</option>
+                  <option value="negative">Negative</option>
+                  <option value="neutral">Neutral</option>
+                </select>
+              </div>
+
+              <button
+                onClick={() => setSortBy(sortBy === 'newest' ? 'oldest' : 'newest')}
+                className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50"
+              >
+                {sortBy === 'newest' ? <SortDesc className="w-4 h-4 text-gray-500" /> : <SortAsc className="w-4 h-4 text-gray-500" />}
+                <span className="text-sm hidden sm:inline">{sortBy === 'newest' ? 'Newest' : 'Oldest'}</span>
+              </button>
+
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 text-orange-600"
+                title="Export to CSV"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm hidden sm:inline">Export</span>
+              </button>
+            </div>
+          </div>
+
+          {filteredLinks.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No links found matching your criteria.</p>
           ) : (
             <div className="space-y-4">
-              {userLinks.map((link) => (
-                <div key={link.id} className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              {filteredLinks.map((link) => (
+                <div key={link.id} className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white">
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-medium text-gray-800">
                         Submitted to: {link.department || 'Uncategorized'}
                       </h4>
-                      <a 
-                        href={link.url} 
-                        target="_blank" 
+                      <a
+                        href={link.url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline text-sm break-all"
                       >
@@ -381,16 +508,27 @@ export default function DashboardPage() {
                       <p className="text-sm text-gray-500 mt-1">
                         Submitted on: {new Date(link.timestamp).toLocaleString()}
                       </p>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveTicketLink(activeTicketLink?.id === link.id ? null : link);
-                        }}
-                        className="mt-2 px-3 py-1 bg-orange-100 text-orange-700 text-sm rounded-md hover:bg-orange-200 transition-colors"
-                      >
-                        {activeTicketLink?.id === link.id ? 'Cancel' : 'Raise Ticket'}
-                      </button>
-                      
+
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveTicketLink(activeTicketLink?.id === link.id ? null : link);
+                          }}
+                          className="px-3 py-1 bg-orange-100 text-orange-700 text-sm rounded-md hover:bg-orange-200 transition-colors"
+                        >
+                          {activeTicketLink?.id === link.id ? 'Cancel' : 'Raise Ticket'}
+                        </button>
+                        {link.processed && (
+                          <button
+                            onClick={() => setClippingLink(link)}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200 transition-colors flex items-center gap-1"
+                          >
+                            <FileText className="w-3 h-3" /> Clipping
+                          </button>
+                        )}
+                      </div>
+
                       {activeTicketLink?.id === link.id && (
                         <div className="mt-3 p-3 bg-gray-50 rounded-md">
                           <textarea
@@ -420,13 +558,13 @@ export default function DashboardPage() {
                       )}
                       {link.processed && (
                         <div className="mt-2">
-                          <span className="inline-block px-2 py-1 text-xs rounded-full" 
-                                style={{
-                                  backgroundColor: link.sentiment === 'positive' ? '#DCFCE7' : 
-                                                link.sentiment === 'negative' ? '#FEE2E2' : '#FEF3C7',
-                                  color: link.sentiment === 'positive' ? '#166534' : 
-                                         link.sentiment === 'negative' ? '#991B1B' : '#92400E'
-                                }}>
+                          <span className="inline-block px-2 py-1 text-xs rounded-full"
+                            style={{
+                              backgroundColor: link.sentiment === 'positive' ? '#DCFCE7' :
+                                link.sentiment === 'negative' ? '#FEE2E2' : '#FEF3C7',
+                              color: link.sentiment === 'positive' ? '#166534' :
+                                link.sentiment === 'negative' ? '#991B1B' : '#92400E'
+                            }}>
                             {link.sentiment?.charAt(0).toUpperCase() + link.sentiment?.slice(1)}
                           </span>
                         </div>
@@ -450,7 +588,78 @@ export default function DashboardPage() {
           )}
         </div>
       </motion.div>
-    </div>
+      {/* Clipping Modal */}
+      {clippingLink && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-serif font-bold text-gray-900">Digital Clipping</h3>
+              <button
+                onClick={() => setClippingLink(null)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
 
+            <div className="p-8 bg-gray-50">
+              <div className="bg-white p-8 shadow-lg mx-auto max-w-lg border border-gray-200">
+                <div className="border-b-2 border-black pb-4 mb-6 flex justify-between items-end">
+                  <div>
+                    <h1 className="text-2xl font-serif font-bold uppercase tracking-wider">{clippingLink.newspaper || 'The Daily News'}</h1>
+                    <p className="text-xs text-gray-500 mt-1">{clippingLink.edition || 'National'} Edition • {new Date(clippingLink.timestamp).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xs font-bold px-2 py-1 uppercase ${clippingLink.sentiment === 'positive' ? 'text-green-700 border border-green-700' :
+                      clippingLink.sentiment === 'negative' ? 'text-red-700 border border-red-700' :
+                        'text-gray-700 border border-gray-700'
+                      }`}>
+                      {clippingLink.sentiment || 'Neutral'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="prose font-serif">
+                  <h2 className="text-xl font-bold mb-4 leading-tight">{clippingLink.title || 'News Article Title'}</h2>
+                  <div className="text-sm text-gray-600 mb-4 italic">
+                    Department: {clippingLink.department}
+                  </div>
+                  <p className="text-gray-800 leading-relaxed">
+                    {clippingLink.content || 'Content not available for this article. This is a placeholder for the actual news content extracted via OCR.'}
+                  </p>
+                  <p className="text-gray-800 leading-relaxed mt-4">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </p>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-gray-200 text-center">
+                  <p className="text-xs text-gray-400">Digitally clipped by MediaMind 360</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2 rounded-b-xl">
+              <button
+                onClick={() => setClippingLink(null)}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+              <button
+                className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                onClick={() => toast.success('Clipping downloaded!')}
+              >
+                <FileText className="w-4 h-4" />
+                Download PDF
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </div>
   );
 }

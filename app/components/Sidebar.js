@@ -60,8 +60,8 @@ export default function Sidebar({ setSidebarWidth }) {
   };
 
   const menuItems = [
-    { name: "Tasks / Activities", icon: ListTodo, href: "/dashboard/tasks" },
-    { name: "Notifications", icon: Bell, href: "/dashboard/messages" },
+    { name: "Tasks / Activities", icon: ListTodo, href: "/dashboard" },
+    { name: "Notifications", icon: Bell, href: "/dashboard/notifications" },
     { name: "History", icon: History, href: "/dashboard/history" },
     { name: "Settings", icon: Settings, href: "/dashboard/settings" },
     { name: "Support", icon: HelpCircle, href: "/dashboard/support" },
@@ -73,23 +73,23 @@ export default function Sidebar({ setSidebarWidth }) {
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="h-screen bg-white text-black flex flex-col shadow-lg fixed left-0 top-0 z-50"
     >
-    {/* Toggle button + User info */}
-<div className="flex items-center justify-between p-4 border-b border-gray-200">
-  <button onClick={() => setIsOpen(!isOpen)}>
-    <Menu className="w-6 h-6" color={sunsetOrange} />
-  </button>
-  <motion.h1
-    initial={false}
-    animate={{
-      opacity: isOpen ? 1 : 0,
-      fontSize: isOpen ? "1rem" : "0rem", // text-base when open
-    }}
-    transition={{ duration: 0.3, ease: "easeInOut" }}
-    className="font-bold text-gray-700 overflow-hidden truncate max-w-[150px]"
-  >
-    {user ? user.email.split("@")[0] : "User"}
-  </motion.h1>
-</div>
+      {/* Toggle button + User info */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <button onClick={() => setIsOpen(!isOpen)}>
+          <Menu className="w-6 h-6" color={sunsetOrange} />
+        </button>
+        <motion.h1
+          initial={false}
+          animate={{
+            opacity: isOpen ? 1 : 0,
+            fontSize: isOpen ? "1rem" : "0rem", // text-base when open
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="font-bold text-gray-700 overflow-hidden truncate max-w-[150px]"
+        >
+          {user ? user.email.split("@")[0] : "User"}
+        </motion.h1>
+      </div>
 
 
       {/* Profile Section */}
@@ -111,9 +111,8 @@ export default function Sidebar({ setSidebarWidth }) {
               {user ? user.email.split("@")[0] : "User"}
             </p>
             <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                dropdownOpen ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transition-transform ${dropdownOpen ? "rotate-180" : ""
+                }`}
             />
           </motion.div>
         </div>
@@ -146,11 +145,10 @@ export default function Sidebar({ setSidebarWidth }) {
             <Link key={idx} href={item.href}>
               <motion.div
                 whileHover={{ scale: 1.05, x: 5 }}
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${isActive
                     ? "bg-orange-100 border-l-4 border-orange-500 font-semibold"
                     : "hover:bg-gray-100"
-                }`}
+                  }`}
                 style={{ color: sunsetOrange }}
               >
                 <item.icon className="w-5 h-5" color={sunsetOrange} />
